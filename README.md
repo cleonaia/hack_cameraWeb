@@ -1,13 +1,10 @@
-<<<<<<< HEAD
-# Análisis de una webcam en un laboratorio local
+# HACK CAMERA WEB 
 
-## Acerca del proyecto
+## Sobre el proyecto
 
-Práctica educativa de ciberseguridad realizada desde una máquina virtual Kali Linux para analizar **una webcam propia dentro de una red local controlada**. El ejercicio estudia cómo una técnica de intermediario basada en suplantación ARP puede afectar al tráfico de la LAN y cómo observar ese tráfico con herramientas de análisis.
+Este proyecto permite desde una máquina virtual Kali Linux poder analizar **una webcam propia dentro de una red local controlada**. Se estudia cómo una técnica de intermediario basada en suplantación ARP puede afectar al tráfico de la LAN y cómo observar ese tráfico con herramientas de análisis.
 
-El flujo de aprendizaje utiliza **Ettercap** para la demostración MiTM, **Wireshark** para inspeccionar paquetes y **Metasploit** como herramienta de laboratorio complementaria. Son herramientas externas: este repositorio no las integra ni automatiza su uso.
-
-> Realiza la práctica únicamente con equipos de tu propiedad, en una red aislada o expresamente autorizada. No captures tráfico de terceros ni pruebes en redes públicas, domésticas compartidas o corporativas.
+El flujo de aprendizaje utiliza **Ettercap** para la demostración MiTM, **Wireshark** para inspeccionar paquetes y **Metasploit** como herramienta de laboratorio complementaria. 
 
 ## Objetivos de aprendizaje
 
@@ -368,4 +365,4 @@ Las pruebas automáticas no ejecutan escaneos, envenenamiento ARP ni escenarios 
 - [Manual del laboratorio](docs/MANUAL.md)
 
 > Estos apuntes son una guía de estudio, no sustituyen la documentación oficial actual de cada sistema, herramienta o plataforma.
->>>>>>> ee221765cecb6a644a071ee7dd1f357ccdd13671
+
