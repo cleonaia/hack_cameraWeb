@@ -1,0 +1,13 @@
+# Local Python environment and generated files
+.venv/
+__pycache__/
+*.py[cod]
+
+# Isolated build output; existing root binaries/objects are intentionally kept.
+/build/
+*.d
+.backup/
+.venv-package-check/
+*.egg-info/
+/dist/
+/tls-transfer/
