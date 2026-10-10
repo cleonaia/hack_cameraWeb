@@ -105,10 +105,10 @@ Los permisos se aplican al propietario, al grupo y a los demás usuarios. `chmod
 APT instala paquetes desde los repositorios configurados y resuelve sus dependencias. En terminal interactiva se suele usar `apt`; `apt-get` continúa siendo útil en scripts.
 
 ```bash
-sudo apt update           # Actualiza el índice de paquetes
-apt search nombre         # Busca un paquete
-apt show nombre           # Consulta información del paquete
-sudo apt install nombre   # Instala el paquete
+sudo apt update           
+apt search nombre         
+apt show nombre           
+sudo apt install nombre   
 ```
 
 Revisa los cambios propuestos antes de confirmarlos. Para instalar software fuera de los repositorios, verifica su procedencia e instrucciones.
