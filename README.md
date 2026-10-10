@@ -3,7 +3,11 @@
 
 # Estructura para comprender el proyecto a realizar 
 
-Este repositorio conserva dos objetivos de servir como material educativo y mantener las herramientas de laboratorio `ft_malcolm`, reconocimiento de cámaras y redes, escenarios ARP y el canal TLS
+Este repositorio conserva dos objetivos de servir como material educativo y mantener las herramientas de laboratorio `ft_malcolm`, reconocimiento de cámaras y redes, escenarios ARP y el canal TLS.
+
+Por cierto, el proyecto fue estudiado y desarrollado durante septiembre de 2026 por lo que debido al ritmo constante de mejoras y actualizaciones, es probable que algunas partes queden obsoletas en un futuro no muy lejano.
+
+
 
 ## Índice
 
