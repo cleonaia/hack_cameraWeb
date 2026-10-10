@@ -28,6 +28,7 @@ dependencies = [
 
 [project.scripts]
 camera-recon = "tools.camera_recon:main"
+camera-view = "tools.camera_view:main"
 arp-poison = "tools.arp_poison:main"
 tls-shell = "tools.tls_shell:main"
 

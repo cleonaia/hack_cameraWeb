@@ -13,6 +13,7 @@ from pathlib import Path
 from unittest import mock
 
 from tools.camera_recon import expand_targets, serialize_results
+from tools.camera_view import open_camera, validate_rtsp_url
 from tools.lab_scope import parse_lab_ipv4
 from tools import tls_shell
 from tools.tls_shell import (
@@ -323,6 +324,7 @@ class PythonCliTests(unittest.TestCase):
     def test_help_options_are_available_without_network_access(self):
         for script, args in (
             ("camera_recon.py", "--help"),
+            ("camera_view.py", "--help"),
             ("arp_poison.py", "--help"),
             ("tls_shell.py", "--help"),
         ):
@@ -330,6 +332,30 @@ class PythonCliTests(unittest.TestCase):
                 result = self.run_cli(script, args)
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertIn("usage:", result.stdout.lower())
+
+    def test_camera_view_requires_an_explicit_local_scope_and_no_url_credentials(self):
+        scopes = ["10.42.0.0/24"]
+        self.assertEqual(
+            validate_rtsp_url("rtsp://10.42.0.20:554/live/main?profile=1", scopes),
+            "rtsp://10.42.0.20:554/live/main?profile=1",
+        )
+        for url in (
+            "rtsp://user:password@10.42.0.20/live",
+            "http://10.42.0.20/live",
+            "rtsp://8.8.8.8/live",
+            "rtsp://camera.lab/live",
+        ):
+            with self.subTest(url=url), self.assertRaises(ValueError):
+                validate_rtsp_url(url, scopes)
+
+    def test_camera_view_launches_vlc_without_shell_or_embedded_password(self):
+        with mock.patch("tools.camera_view.shutil.which", return_value="/usr/bin/vlc"), \
+             mock.patch("tools.camera_view.subprocess.run", return_value=subprocess.CompletedProcess([], 0)) as run:
+            self.assertEqual(open_camera("rtsp://10.42.0.20/stream", ["10.42.0.0/24"]), 0)
+            run.assert_called_once_with(
+                ["/usr/bin/vlc", "--no-one-instance", "rtsp://10.42.0.20/stream"],
+                check=False,
+            )
 
     def test_network_clis_reject_public_targets_before_io(self):
         camera = self.run_cli("camera_recon.py", "-t", "8.8.8.8")
