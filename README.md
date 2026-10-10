@@ -111,3 +111,7 @@ En macOS, `ifconfig`, `netstat -rn` y `lsof -nP -i` permiten consultar interface
 Un firewall aplica reglas de entrada, salida y reenvío. Usa la herramienta administrada por tu distribución —por ejemplo, `ufw` o `nftables`— y conserva una vía de recuperación antes de cambiar reglas remotamente. Empieza por una política documentada y permite únicamente el tráfico necesario. No copies reglas de firewall de Internet sin entender su efecto.
 
 ---
+
+## 2. Fundamentos de redes
+
+### 2.1 Modelo OSI
