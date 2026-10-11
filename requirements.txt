@@ -1,3 +1,0 @@
-# Reproducible developer/runtime environment. Dependency declarations live in
-# pyproject.toml; the lock pins the environment verified with Python 3.14.3.
--r requirements.lock
