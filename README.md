@@ -362,6 +362,13 @@ Una máquina virtual puede tener una IP distinta de la máquina anfitriona, depe
 - **Adaptador puente**: la máquina virtual aparece como otro dispositivo de la misma red local.
 - **Red interna o solo-anfitrión**: útil para laboratorios aislados.
 
+
+Una máquina virtual puede tener una IP distinta de la máquina anfitriona, dependiendo de su configuración de red:
+
+- **NAT**: la máquina virtual sale a Internet mediante la conexión del anfitrión.
+- **Adaptador puente**: la máquina virtual aparece como otro dispositivo de la misma red local.
+- **Red interna o solo-anfitrión**: útil para laboratorios aislados.
+
 ***
 
 ### Capa 3: red
@@ -384,6 +391,12 @@ Máscara: 255.255.0.0
 ```
 
 En binario:
+
+```text
+255.255.0.0  = 11111111.11111111.00000000.00000000
+192.168.0.1  = 11000000.10101000.00000000.00000001
+```
+
 
 ```text
 255.255.0.0  = 11111111.11111111.00000000.00000000
