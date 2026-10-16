@@ -1,21 +1,16 @@
-# Security Policy
+# Política de seguridad
 
-## Supported Versions
+## Versiones compatibles
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Actualmente solo se ofrecen actualizaciones de seguridad para las versiones indicadas como compatibles:
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| Versión | Soporte de seguridad |
+|---------|----------------------|
+| 5.1.x   | ✅ Compatible |
+| 5.0.x   | ❌ Sin soporte |
+| 4.0.x   | ✅ Compatible |
+| < 4.0   | ❌ Sin soporte |
 
-## Reporting a Vulnerability
+Si utilizas una versión sin soporte, te recomendamos actualizar a la última versión estable disponible.
 
-Use this section to tell people how to report a vulnerability.
-
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+Gracias por ayudar a mantener este proyecto seguro.
